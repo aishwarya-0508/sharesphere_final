@@ -1,101 +1,53 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
 
-import authRoutes from './routes/auth.js';
-import resourceRoutes from './routes/resources.js';
-import requestRoutes from './routes/requests.js';
-import notificationRoutes from './routes/notifications.js';
-import analyticsRoutes from './routes/analytics.js';
+import authRoutes from "./routes/auth.js";
+import resourceRoutes from "./routes/resources.js";
+import requestRoutes from "./routes/requests.js";
 
 dotenv.config();
 
 const app = express();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ======================
-// Middleware
-// ======================
-
 app.use(
   cors({
-    origin: true,
-    credentials: true
+    origin: "*",
   })
 );
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-// Static uploads folder
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log(err));
 
-// ======================
-// MongoDB Connection
-// ======================
+app.use("/api/auth", authRoutes);
+app.use("/api/resources", resourceRoutes);
+app.use("/api/requests", requestRoutes);
 
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-
-    console.log(
-      `MongoDB Connected: ${conn.connection.host}`
-    );
-  } catch (error) {
-    console.error('MongoDB Connection Error:', error.message);
-    process.exit(1);
-  }
-};
-
-connectDB();
-
-// ======================
-// API Routes
-// ======================
-
-app.use('/api/auth', authRoutes);
-app.use('/api/resources', resourceRoutes);
-app.use('/api/requests', requestRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/analytics', analyticsRoutes);
-
-// ======================
-// Test Route
-// ======================
-
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.json({
-    success: true,
-    message: 'ShareSphere Backend Running'
+    message: "ShareSphere Backend Running",
   });
 });
 
-// ======================
-// Error Handler
-// ======================
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
+app.use(
+  cors({
+    origin: [
+      "https://your-frontend.vercel.app"
+    ],
+    credentials: true,
+  })
+);
 
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal Server Error'
-  });
-});
-
-// ======================
-// Start Server (Local)
-// ======================
-
+app.use("/api/requests", requestRoutes);
 const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
 });
-// Export for Vercel
-export default app;

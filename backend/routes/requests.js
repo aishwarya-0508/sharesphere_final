@@ -1,17 +1,21 @@
-import express from 'express';
-import authMiddleware from '../middleware/auth.js';
-import {
-  getNotifications,
-  markAsRead,
-  markAllAsRead,
-  getUnreadCount
-} from '../controllers/notificationController.js';
+import express from "express";
 
 const router = express.Router();
 
-router.get('/all', authMiddleware, getNotifications);
-router.get('/unread-count', authMiddleware, getUnreadCount);
-router.put('/:id/read', authMiddleware, markAsRead);
-router.put('/read-all', authMiddleware, markAllAsRead);
+// Get all requests
+router.get("/", (req, res) => {
+  res.json({
+    success: true,
+    requests: [],
+  });
+});
+
+// Create request
+router.post("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Request created",
+  });
+});
 
 export default router;

@@ -1,64 +1,76 @@
-import { Routes, Route } from 'react-router-dom'
-import { Home } from './pages/Home'
-import { SellerLogin, BuyerLogin, SellerRegister, BuyerRegister } from './pages/AuthPages'
-import { SellerDashboard, BuyerDashboard } from './pages/Dashboard'
-import { AddResource, EditResource } from './pages/ResourceForm'
-import { ResourceDetail } from './pages/ResourceDetail'
-import { ProtectedRoute } from './components/ProtectedRoute'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import HomePage from "./pages/HomePage";
+import Login from "./pages/Login";
+import RegisterSeller from "./pages/RegisterSeller";
+import RegisterBuyer from "./pages/RegisterBuyer";
+import SellerDashboard from "./pages/SellerDashboard";
+import BuyerDashboard from "./pages/BuyerDashboard";
+import AddResource from "./pages/AddResource";
+import EditResource from "./pages/EditResource";
+import SellerRequests from "./pages/SellerRequests";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login-seller" element={<SellerLogin />} />
-      <Route path="/login-buyer" element={<BuyerLogin />} />
-      <Route path="/register-seller" element={<SellerRegister />} />
-      <Route path="/register-buyer" element={<BuyerRegister />} />
-      
-      <Route 
-        path="/seller-dashboard" 
-        element={
-          <ProtectedRoute requiredRole="seller">
-            <SellerDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/buyer-dashboard" 
-        element={
-          <ProtectedRoute requiredRole="buyer">
-            <BuyerDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/add-resource" 
-        element={
-          <ProtectedRoute requiredRole="seller">
-            <AddResource />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/edit-resource/:id" 
-        element={
-          <ProtectedRoute requiredRole="seller">
-            <EditResource />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/resource/:id" 
-        element={
-          <ProtectedRoute requiredRole="buyer">
-            <ResourceDetail />
-          </ProtectedRoute>
-        } 
-      />
-    </Routes>
-  )
+    <BrowserRouter>
+      <Routes>
+
+        {/* Home Page */}
+        <Route
+          path="/"
+          element={<HomePage />}
+        />
+
+        {/* Login Pages */}
+        <Route
+          path="/seller-login"
+          element={<Login role="Seller" />}
+        />
+
+        <Route
+          path="/buyer-login"
+          element={<Login role="Buyer" />}
+        />
+
+        {/* Registration Pages */}
+        <Route
+          path="/register-seller"
+          element={<RegisterSeller />}
+        />
+
+        <Route
+          path="/register-buyer"
+          element={<RegisterBuyer />}
+        />
+
+        {/* Dashboards */}
+        <Route
+          path="/seller-dashboard"
+          element={<SellerDashboard />}
+        />
+
+        <Route
+          path="/buyer-dashboard"
+          element={<BuyerDashboard />}
+        />
+
+        {/* Resource Management */}
+        <Route
+          path="/add-resource"
+          element={<AddResource />}
+        />
+
+        <Route
+          path="/edit-resource/:id"
+          element={<EditResource />}
+        />
+<Route
+  path="/seller-requests"
+  element={<SellerRequests />}
+/>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

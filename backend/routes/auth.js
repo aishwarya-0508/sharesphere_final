@@ -1,13 +1,39 @@
-import express from 'express';
-import authMiddleware from '../middleware/auth.js';
-import { registerSeller, registerBuyer, login, logout, getCurrentUser } from '../controllers/authController.js';
+import express from "express";
+
+import {
+  registerSeller,
+  registerBuyer,
+  login,
+  logout,
+  getCurrentUser,
+} from "../controllers/authController.js";
+
+import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.post('/register-seller', registerSeller);
-router.post('/register-buyer', registerBuyer);
-router.post('/login', login);
-router.post('/logout', authMiddleware, logout);
-router.get('/current-user', authMiddleware, getCurrentUser);
+router.post(
+  "/register-seller",
+  registerSeller
+);
+
+router.post(
+  "/register-buyer",
+  registerBuyer
+);
+
+router.post("/login", login);
+
+router.post(
+  "/logout",
+  authMiddleware,
+  logout
+);
+
+router.get(
+  "/current-user",
+  authMiddleware,
+  getCurrentUser
+);
 
 export default router;

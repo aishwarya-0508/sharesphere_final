@@ -1,24 +1,23 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const resourceSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  category: {
-    type: String,
-    enum: ['Books', 'Electronics', 'Furniture', 'Sports Equipment', 'Stationery', 'Tools', 'Medical Equipment', 'Household Items', 'Educational Materials', 'Other'],
-    required: true
-  },
-  description: { type: String, required: true },
-  image: { type: String, default: null },
-  condition: { type: String, enum: ['New', 'Like New', 'Good', 'Fair', 'Poor'], required: true },
-  status: {
-    type: String,
-    enum: ['Available', 'Requested', 'Approved', 'Shared', 'Returned'],
-    default: 'Available'
-  },
-  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  contactInfo: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+const resourceSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    category: { type: String, required: true },
 
-export default mongoose.model('Resource', resourceSchema);
+    condition: { type: String, default: "Good" },
+    status: { type: String, default: "Available" },
+    location: { type: String, default: "" },
+
+    // ✅ FIXED FIELD NAME
+    sellerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model("Resource", resourceSchema);

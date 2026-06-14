@@ -1,107 +1,148 @@
-import Resource from '../models/Resource.js';
-import Request from '../models/Request.js';
-import Notification from '../models/Notification.js';
+import Resource from "../models/Resource.js";
 
+// Add Resource
 export const addResource = async (req, res) => {
   try {
-    const { title, category, description, condition, contactInfo } = req.body;
-    const sellerId = req.user.id;
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    const { title, description, category, location } = req.body;
 
-    const resource = new Resource({
+    const resource = await Resource.create({
       title,
-      category,
       description,
-      condition,
-      contactInfo,
-      image,
-      sellerId
+      category,
+      location,
+      sellerId: req.user.id,
     });
 
-    await resource.save();
-    res.status(201).json({ message: 'Resource added successfully', resource });
+    res.status(201).json({
+      success: true,
+      resource,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
+// Get All Resources
 export const getAllResources = async (req, res) => {
   try {
-    const { category, status, search } = req.query;
-    let filter = {};
+    const resources = await Resource.find();
 
-    if (category) filter.category = category;
-    if (status) filter.status = status;
-    if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
-    }
+    console.log("All Resources:", resources);
 
-    const resources = await Resource.find(filter)
-      .populate('sellerId', 'name email phone')
-      .sort({ createdAt: -1 });
-
-    res.json(resources);
+    res.json({
+      success: true,
+      resources,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.log(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+// Get Seller Resources
+export const getSellerResources = async (req, res) => {
+  try {
+
+    console.log("DECODED USER:", req.user);
+    console.log("Logged User:", req.user.id);
+
+    const resources = await Resource.find({
+      sellerId: req.user.id,
+    });
+
+    console.log("Resources Found:", resources);
+
+    res.json({
+      success: true,
+      resources,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
+// Get Single Resource
 export const getResourceById = async (req, res) => {
   try {
-    const resource = await Resource.findById(req.params.id).populate('sellerId', 'name email phone');
+    const resource = await Resource.findById(req.params.id);
+
     if (!resource) {
-      return res.status(404).json({ message: 'Resource not found' });
+      return res.status(404).json({
+        message: "Resource not found",
+      });
     }
+
     res.json(resource);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
+// Update Resource
 export const updateResource = async (req, res) => {
   try {
-    const { title, category, description, condition, contactInfo } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const resource = await Resource.findById(req.params.id);
 
-    const updateData = { title, category, description, condition, contactInfo };
-    if (image) updateData.image = image;
+    if (!resource) {
+      return res.status(404).json({
+        message: "Resource not found",
+      });
+    }
 
-    const resource = await Resource.findByIdAndUpdate(
+    if (resource.sellerId.toString() !== req.user.id) {
+      return res.status(401).json({
+        message: "Not Authorized",
+      });
+    }
+
+    const updated = await Resource.findByIdAndUpdate(
       req.params.id,
-      updateData,
+      req.body,
       { new: true }
     );
 
-    if (!resource) {
-      return res.status(404).json({ message: 'Resource not found' });
-    }
-
-    res.json({ message: 'Resource updated successfully', resource });
+    res.json(updated);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
+
+// Delete Resource
 export const deleteResource = async (req, res) => {
   try {
-    const resource = await Resource.findByIdAndDelete(req.params.id);
-    if (!resource) {
-      return res.status(404).json({ message: 'Resource not found' });
-    }
-    res.json({ message: 'Resource deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    const resource = await Resource.findById(req.params.id);
 
-export const getSellerResources = async (req, res) => {
-  try {
-    const resources = await Resource.find({ sellerId: req.user.id }).sort({ createdAt: -1 });
-    res.json(resources);
+    if (!resource) {
+      return res.status(404).json({
+        message: "Resource not found",
+      });
+    }
+
+    if (resource.sellerId.toString() !== req.user.id) {
+      return res.status(401).json({
+        message: "Not Authorized",
+      });
+    }
+
+    await Resource.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: "Resource Deleted",
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
