@@ -84,3 +84,40 @@ npm install
 3. Create .env file
 
 VITE_API_URL=http://localhost
+
+## Deploying to Render and Vercel
+
+### 1. Deploy the backend on Render
+
+Create a Render Web Service from this repository. The included `render.yaml` can be used as a blueprint, or configure these values manually:
+
+* Root Directory: `backend`
+* Build Command: `npm install`
+* Start Command: `npm start`
+
+Add these Render environment variables:
+
+* `MONGODB_URI`: your MongoDB Atlas connection string
+* `JWT_SECRET`: a long random secret
+* `CLIENT_URL`: your final Vercel URL, for example `https://sharesphere.vercel.app`
+
+Copy the Render service URL after deployment, for example `https://sharesphere-api.onrender.com`.
+
+### 2. Deploy the frontend on Vercel
+
+Import the same repository into Vercel and set:
+
+* Root Directory: `frontend`
+* Framework Preset: `Vite`
+* Build Command: `npm run build`
+* Output Directory: `dist`
+
+Before deploying, add this Vercel environment variable:
+
+* `VITE_API_URL`: `https://sharesphere-api.onrender.com/api`
+
+After the first Vercel deployment, update Render's `CLIENT_URL` with the exact Vercel URL and redeploy the backend. This allows browser requests from the deployed frontend.
+
+### 3. Verify production flow
+
+Register one seller and one buyer, add a resource as the seller, request it as the buyer, then use **View Requests** in the seller dashboard to accept or decline it.
