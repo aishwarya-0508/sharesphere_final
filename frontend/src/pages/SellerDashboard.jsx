@@ -1,7 +1,7 @@
 import { startTransition, useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
-import "./SellerDashboard.css";
+import "./sellerDashboard.css";
 
 function SellerDashboard() {
   const [resources, setResources] = useState([]);
