@@ -1,6 +1,6 @@
 import { useState } from "react";
 import API from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login({ role }) {
   const navigate = useNavigate();
@@ -10,6 +10,8 @@ function Login({ role }) {
       email: "",
       password: "",
     });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({
@@ -21,12 +23,19 @@ function Login({ role }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
       const res = await API.post(
         "/auth/login",
         formData
       );
+
+      if (res.data.user.role.toLowerCase() !== role.toLowerCase()) {
+        setError(`This account is registered as a ${res.data.user.role}. Use the ${res.data.user.role.toLowerCase()} login.`);
+        return;
+      }
 
       localStorage.setItem(
         "token",
@@ -46,41 +55,58 @@ if (userRole === "seller") {
   navigate("/buyer-dashboard");
 }
 
-      console.log(res.data);
-console.log(res.data.user);
-console.log(res.data.user.role);
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          "Login Failed"
-      );
+      setError(error.response?.data?.message || "Login failed. Check your details and try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="form-container">
-      <h2>{role} Login</h2>
+    <main className="login-page">
+      <section className="login-panel">
+        <div className="login-brand">ShareSphere</div>
+        <p className="eyebrow">{role} Portal</p>
+        <h1>Welcome back</h1>
+        <p className="login-subtitle">
+          Sign in to manage your community resource sharing account.
+        </p>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-        />
+        {error && <div className="inline-error">{error}</div>}
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-        />
+        <form className="login-form" onSubmit={handleSubmit}>
+          <label htmlFor="login-email">Email address</label>
+          <input
+            id="login-email"
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
 
-        <button type="submit">
-          Login
-        </button>
-      </form>
-    </div>
+          <label htmlFor="login-password">Password</label>
+          <input
+            id="login-password"
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+
+          <button className="login-submit" type="submit" disabled={loading}>
+            {loading ? "Signing in..." : `Sign in as ${role}`}
+          </button>
+        </form>
+
+        <p className="login-footer">
+          Need an account? <Link to={role === "Seller" ? "/register-seller" : "/register-buyer"}>Create one</Link>
+        </p>
+      </section>
+    </main>
   );
 }
 

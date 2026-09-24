@@ -27,7 +27,10 @@ export const addResource = async (req, res) => {
 // Get All Resources
 export const getAllResources = async (req, res) => {
   try {
-    const resources = await Resource.find();
+    const resources = await Resource.find().populate(
+      "sellerId",
+      "name email"
+    );
 
     console.log("All Resources:", resources);
 

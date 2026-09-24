@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 import authRoutes from "./routes/auth.js";
 import resourceRoutes from "./routes/resources.js";
-import requestRoutes from "./routes/requests.js";
+import requestRoutes from "./routes/requestRoutes.js";
 
 dotenv.config();
 
@@ -35,17 +35,6 @@ app.get("/", (req, res) => {
   });
 });
 
-
-app.use(
-  cors({
-    origin: [
-      "https://your-frontend.vercel.app"
-    ],
-    credentials: true,
-  })
-);
-
-app.use("/api/requests", requestRoutes);
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {

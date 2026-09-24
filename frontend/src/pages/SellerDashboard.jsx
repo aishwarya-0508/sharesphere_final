@@ -1,20 +1,24 @@
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
+import "./SellerDashboard.css";
 
 function SellerDashboard() {
   const [resources, setResources] = useState([]);
+  const [requestCount, setRequestCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
   const fetchResources = async () => {
   try {
-    const res = await API.get("/resources/seller");
+      const [resourceResponse, requestResponse] = await Promise.all([
+        API.get("/resources/seller"),
+        API.get("/requests/seller"),
+      ]);
 
-    console.log("Seller Resources:", res.data);
-
-    setResources(res.data.resources || []);
+      setResources(resourceResponse.data.resources || []);
+      setRequestCount(requestResponse.data.requests?.length || 0);
   } catch (err) {
     console.log("API Error:", err);
     setResources([]);
@@ -23,7 +27,9 @@ function SellerDashboard() {
   }
 };
   useEffect(() => {
-    fetchResources();
+    startTransition(() => {
+      fetchResources();
+    });
   }, []);
 
   const deleteResource = async (id) => {
@@ -52,19 +58,24 @@ function SellerDashboard() {
   }
 
   return (
-    <div className="container">
+    <div className="container dashboard-shell seller-dashboard">
 
       <div className="dashboard-header">
-        <h1>Seller Dashboard</h1>
+        <div>
+          <p className="eyebrow">Seller Portal</p>
+          <h1>Seller Dashboard</h1>
+        </div>
 
         <div>
           <button
+            className="request-button"
             onClick={() => navigate("/add-resource")}
           >
             Add Resource
           </button>
 
           <button
+            className="secondary-button"
             onClick={logout}
             style={{ marginLeft: "10px" }}
           >
@@ -72,6 +83,7 @@ function SellerDashboard() {
           </button>
 
           <button
+            className="secondary-button"
   onClick={() =>
     navigate("/seller-requests")
   }
@@ -81,8 +93,37 @@ function SellerDashboard() {
         </div>
       </div>
 
-      <h3>Total Resources: {resources.length}</h3>
+<div className="dashboard-banner">
+  <div className="banner-overlay">
 
+    <div className="banner-content">
+      <h2>Welcome Back Seller 👋</h2>
+
+      <p>
+        Manage your resources, track requests and help
+        your community through resource sharing.
+      </p>
+    </div>
+
+    <div className="stats-container">
+      <div className="stat-card">
+        <h3>{resources.length}</h3>
+        <p>Total Resources</p>
+      </div>
+
+      <div className="stat-card">
+        <h3>{requestCount}</h3>
+        <p>Requests</p>
+      </div>
+
+      <div className="stat-card">
+        <h3>{resources.filter((resource) => resource.status !== "Available").length}</h3>
+        <p>Unavailable</p>
+      </div>
+    </div>
+
+  </div>
+</div>
       <div className="resource-grid">
 
         {resources.length === 0 ? (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 
@@ -24,7 +24,9 @@ const fetchResources = async () => {
 };
 
   useEffect(() => {
-    fetchResources();
+    startTransition(() => {
+      fetchResources();
+    });
   }, []);
 
   const handleRequest = async (resourceId) => {
@@ -69,79 +71,80 @@ const fetchResources = async () => {
   }
 
   return (
-    <div className="container">
+    <div className="container dashboard-shell">
       <div className="dashboard-header">
-        <h1>Buyer Dashboard</h1>
+        <div>
+          <p className="eyebrow">Buyer Portal</p>
+          <h1>Buyer Dashboard</h1>
+        </div>
 
-        <button onClick={logout}>
+        <button className="secondary-button" onClick={logout}>
           Logout
         </button>
       </div>
 
-      <h3>
-        Available Resources: {resources.length}
-      </h3>
+      <div className="dashboard-summary">
+        <div className="summary-card">
+          <span>Available Resources</span>
+          <strong>{resources.length}</strong>
+        </div>
+      </div>
 
       <div className="resource-grid">
         {resources.length === 0 ? (
-          <h2>No Resources Available</h2>
+          <div className="empty-state">
+            <h2>No Resources Available</h2>
+            <p>New items from sellers will appear here.</p>
+          </div>
         ) : (
           resources.map((resource) => (
             <div
               key={resource._id}
-              className="card"
+              className="card resource-card"
             >
+              <div className="resource-topline">
+                <span className="status-pill status-pill--available">
+                  {resource.status || "Available"}
+                </span>
+                <span className="resource-category">
+                  {resource.category}
+                </span>
+              </div>
+
               <h3>{resource.title}</h3>
-
-              <p>{resource.description}</p>
-
-              <p>
-                <strong>Category:</strong>{" "}
-                {resource.category}
+              <p className="resource-description">
+                {resource.description}
               </p>
 
-              <p>
-                <strong>Location:</strong>{" "}
-                {resource.location}
-              </p>
-
-              <p>
-                <strong>Status:</strong>{" "}
-                {resource.status}
-              </p>
+              <div className="resource-meta">
+                <p>
+                  <strong>Location:</strong> {resource.location || "Not specified"}
+                </p>
+              </div>
 
               {resource.sellerId && (
-                <>
+                <div className="seller-meta">
                   <p>
-                    <strong>Seller:</strong>{" "}
-                    {resource.sellerId.name}
+                    <strong>Seller:</strong> {resource.sellerId.name}
                   </p>
 
                   <p>
-                    <strong>Email:</strong>{" "}
-                    {resource.sellerId.email}
+                    <strong>Email:</strong> {resource.sellerId.email}
                   </p>
-                </>
+                </div>
               )}
 
               <button
+                className="request-button"
                 disabled={
-                  resource.status !==
-                    "Available" ||
-                  requestingId ===
-                    resource._id
+                  resource.status !== "Available" ||
+                  requestingId === resource._id
                 }
-                onClick={() =>
-                  handleRequest(
-                    resource._id
-                  )
-                }
+                onClick={() => handleRequest(resource._id)}
               >
-                {requestingId ===
-                resource._id
+                {requestingId === resource._id
                   ? "Sending..."
-                  : resource.status ===
-                    "Available"
+                  : resource.status === "Available"
                   ? "Request Resource"
                   : "Not Available"}
               </button>
